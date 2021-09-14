@@ -72,66 +72,67 @@ function handleMessage(sender_psid, received_message) {
                 }]
             }
             break;
+    }
 
-            callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response);
 
+};
+
+function processRequest(arraySelect, message) {
+
+    /* Form response
+    {
+        "text": "",
+        "quick_replies": [{
+            "content_type": "text",
+            "title": "option 1",
+            "payload": "<POSTBACK_PAYLOAD>"
+        },
+        {
+            "content_type": "text",
+            "title": "option 2",
+            "payload": "<POSTBACK_PAYLOAD>"
+        }]
+    };
+    */
+
+    //the button for custom select by add to response.quick_replies.push(replies)
+    let replies = {
+        "content_type": "text",
+        "payload": "<POSTBACK_PAYLOAD>"
     };
 
-    function processRequest(arraySelect, message) {
+    let response = {
+        "quick_replies": []
+    };
 
-        /* Form response
-        {
-            "text": "",
-            "quick_replies": [{
-                "content_type": "text",
-                "title": "option 1",
-                "payload": "<POSTBACK_PAYLOAD>"
-            },
-            {
-                "content_type": "text",
-                "title": "option 2",
-                "payload": "<POSTBACK_PAYLOAD>"
-            }]
-        };
-        */
+    //create button for user choose next message
+    arraySelect.forEach(element => {
+        replies.title = element;
+        response.quick_replies.push(replies);
+    })
 
-        //the button for custom select by add to response.quick_replies.push(replies)
-        let replies = {
-            "content_type": "text",
-            "payload": "<POSTBACK_PAYLOAD>"
-        };
+    //message response
+    response.text = message;
 
-        let response = {
-            "quick_replies": []
-        };
+    return response;
+}
 
-        //create button for user choose next message
-        arraySelect.forEach(element => {
-            replies.title = element;
-            response.quick_replies.push(replies);
-        })
+// Sends response messages via the Send API (fom Facebook developer)
+function callSendAPI(sender_psid, response) {
+    let request_body = {
+        recipient: {
+            id: sender_psid,
+        },
+        message: response,
+    };
+    // Send the HTTP request to the Messenger Platform
+    request({
+        uri: "https://graph.facebook.com/v2.6/me/messages",
+        qs: { access_token: PAGE_ACCESS_TOKEN },
+        method: "POST",
+        json: request_body,
+    });
+}
 
-        //message response
-        response.text = message;
-
-        return response;
-    }
-
-    // Sends response messages via the Send API (fom Facebook developer)
-    function callSendAPI(sender_psid, response) {
-        let request_body = {
-            recipient: {
-                id: sender_psid,
-            },
-            message: response,
-        };
-        // Send the HTTP request to the Messenger Platform
-        request({
-            uri: "https://graph.facebook.com/v2.6/me/messages",
-            qs: { access_token: PAGE_ACCESS_TOKEN },
-            method: "POST",
-            json: request_body,
-        });
-    }
-
-    module.exports = initWebRouters;
+module.exports = initWebRouters;
