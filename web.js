@@ -10,19 +10,16 @@ let router = express.Router();
 
 //initial router of the web
 let initWebRouters = (app) => {
-    router.get("/", getHomePage);
+    router.get("/", (req, res) => {
+        return res.send("<h1 align=\"center\">Developing... See you soon!!</h1>");
+    });
     router.get("/webhook", getWebhook);
     router.post("/webhook", postWebhook);
     return app.use("/", router);
 };
 
-let getHomePage = (req, res) => {
-    return res.send("<h1 align=\"center\">Developing... See you soon!!</h1>");
-};
-
 //fom Facebook developer
 let getWebhook = (req, res) => {
-
     let mode = req.query["hub.mode"];
     let token = req.query["hub.verify_token"];
     let challenge = req.query["hub.challenge"];
@@ -55,29 +52,68 @@ let postWebhook = (req, res) => {
     }
 };
 
+//custom for personal
 function handleMessage(sender_psid, received_message) {
     const message = received_message.text;
 
-    let response = {
-        "text": "",
-        "quick_replies": [{
-            "content_type": "text",
-            "title": "today",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "tomorrow",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }]
-    };
+    let response;
 
-    response.text = "Developing...!!" + message;
+    switch (message.toLowerCase()) {
+        case "help":
+            response = processRequest(["1", "2"], "Hiện tại chưa có gì!!");
+            break;
+        default:
+            response = {
+                "text": `"${message}" request not supported yet. Type "help" to receive help.`
+            }
+            break;
+    }
 
     callSendAPI(sender_psid, response);
 
 };
 
-// Sends response messages via the Send API
+function processRequest(arraySelect, message) {
+
+    /* Form response
+    {
+        "text": "",
+        "quick_replies": [{
+            "content_type": "text",
+            "title": "option 1",
+            "payload": "<POSTBACK_PAYLOAD>"
+        },
+        {
+            "content_type": "text",
+            "title": "option 2",
+            "payload": "<POSTBACK_PAYLOAD>"
+        }]
+    };
+    */
+
+    //the button for custom select by add to response.quick_replies.push(replies)
+    let replies = {
+        "content_type": "text",
+        "payload": "<POSTBACK_PAYLOAD>"
+    };
+
+    let response = {
+        "quick_replies": []
+    };
+
+    //create button for user choose next message
+    arraySelect.forEach(element => {
+        replies.title = element;
+        response.quick_replies.push(replies);
+    })
+
+    //message response
+    response.text = message;
+
+    return response;
+}
+
+// Sends response messages via the Send API (fom Facebook developer)
 function callSendAPI(sender_psid, response) {
     let request_body = {
         recipient: {
@@ -93,6 +129,5 @@ function callSendAPI(sender_psid, response) {
         json: request_body,
     });
 }
-
 
 module.exports = initWebRouters;

@@ -7,7 +7,6 @@ let app = express();
 //config view engine
 app.set("view engine", "ejs");
 
-
 //parser request to json
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
