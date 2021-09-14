@@ -1,17 +1,28 @@
+import express from "express";
 require("dotenv").config();
 import request from "request";
 
-import ui from "../public/ui"
-
+//CONST connect to page server
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
 
-let getHomePage = (req, res) => {
-    return res.send(ui);
+let router = express.Router();
+
+let initWebRouters = (app) => {
+    router.get("/", getHomePage);
+
+    router.get("/webhook", getWebhook);
+    router.post("/webhook", postWebhook);
+
+    return app.use("/", router);
 };
 
-let getWebhook = async(req, res) => {
+let getHomePage = (req, res) => {
+    return res.send("<h1 align=\"center\">Developing... See you soon!!</h1>");
+};
+
+let getWebhook = (req, res) => {
     let mode = req.query["hub.mode"];
     let token = req.query["hub.verify_token"];
     let challenge = req.query["hub.challenge"];
@@ -26,7 +37,7 @@ let getWebhook = async(req, res) => {
     }
 };
 
-let postWebhook = async(req, res) => {
+let postWebhook = (req, res) => {
     // Parse the request body from the POST
     let body = req.body;
 
@@ -58,12 +69,7 @@ let postWebhook = async(req, res) => {
     }
 };
 
-/* async function getSchedule() {
-    return await run();
-} */
 
-
-// Handles messages events
 function handleMessage(sender_psid, received_message) {
 
     // const message = received_message.text;
@@ -113,8 +119,5 @@ function callSendAPI(sender_psid, response) {
 }
 
 
-module.exports = {
-    getHomePage: getHomePage,
-    getWebhook: getWebhook,
-    postWebhook: postWebhook,
-};
+
+module.exports = initWebRouters;
