@@ -1,14 +1,14 @@
 require("dotenv").config();
 import request from "request";
 
+import ui from "../public/ui"
+
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-const run = require("./data");
 
 let getHomePage = (req, res) => {
-
-    return res.send("Nguyen Dai Hiep");
+    return res.send(ui);
 };
 
 let getWebhook = async(req, res) => {
@@ -64,17 +64,12 @@ let postWebhook = async(req, res) => {
 
 
 // Handles messages events
-async function handleMessage(sender_psid, received_message) {
+function handleMessage(sender_psid, received_message) {
 
     const message = received_message.text;
-    let data = "";
-    if (message == "mon" || message == "tue" || message == "wed" || message == "thu" || message == "fri" || message == "sat" || message == "sun" || message == "today" || message == "tomorrow") {
-        data = await run();
-    }
 
     let helps = [
         "⇨ mon, tue, wed, thu, fri, sat, sun, today, tomorrow: see the class schedule.",
-        "⇨ sleep: see the time you should wake up for health."
     ]
 
     let response = {
@@ -121,85 +116,12 @@ async function handleMessage(sender_psid, received_message) {
             "payload": "<POSTBACK_PAYLOAD>"
         }]
     };
-    switch (message.toLowerCase()) {
-        case "mon":
-            response.text = "Monday\n\n" + scheduleData(data, 2);
-            break;
-        case "tue":
-            response.text = "Tuesday\n\n" + scheduleData(data, 3);
-            break;
-        case "wed":
-            response.text = "Wednesday\n\n" + scheduleData(data, 4);
-            break;
-        case "thu":
-            response.text = "Thursday\n\n" + scheduleData(data, 5);
-            break;
-        case "fri":
-            response.text = "Friday\n\n" + scheduleData(data, 6);
-            break;
-        case "sat":
-            response.text = "Saturday\n\n" + scheduleData(data, 7);
-            break;
-        case "sun":
-            response.text = "Sunday\n\n" + scheduleData(data, 8);
-            break;
-        case "help":
-            response.text = helps.join("\n");
-            break;
-        case "today":
-        case "tomorrow":
-            const date = new Date();
-            const day = date.getDate();
-            const month = date.getMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12
-            let orderDay = date.getDay();
-
-
-            console.log(date.getMinutes());
-            console.log(date.getHours());
-            if (message == "tomorrow") {
-                response.text = `Tomorrow (${day + 1}-${month})\n\n` + scheduleData(data, orderDay + 2);
-            } else {
-                response.text = `Today (${day}-${month})\n\n` + scheduleData(data, orderDay + 1);
-            }
-            break;
-        default:
-            response.text = `Your "${message}" request don't have in my server. Type "help" to know about this chatbot.`;
-            break;
-    }
+    response.text = helps.join("\n");
 
     // Send the response message
     callSendAPI(sender_psid, response);
 
 };
-
-function scheduleData(data, date) {
-
-    let result = []
-
-    const processData = data.split('?')
-
-    processData.forEach(e => {
-        if (date == 0) {
-            date = 8;
-        }
-        if (e[0] == date) {
-            result.push("Shift: " + e[3] + " Subject: " + dataCl(e));
-        }
-    })
-
-    if (result.length == 0) {
-        return "You have no events scheduled.";
-    }
-    return result.join("\n\n");
-}
-
-function dataCl(str) {
-    if (str.charAt(15) == " ") {
-        return str.slice(16)
-    }
-    return str.slice(18)
-}
-
 
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
@@ -211,21 +133,11 @@ function callSendAPI(sender_psid, response) {
     };
     // Send the HTTP request to the Messenger Platform
     request({
-            uri: "https://graph.facebook.com/v2.6/me/messages",
-            qs: { access_token: PAGE_ACCESS_TOKEN },
-            method: "POST",
-            json: request_body,
-        }
-        /* ,
-        		(err, res, body) => {
-        			if (!err) {
-        				console.log("message sent!");
-        			} else {
-        				console.error("Unable to send message:" + err);
-        			}
-        		}
-        	 */
-    );
+        uri: "https://graph.facebook.com/v2.6/me/messages",
+        qs: { access_token: PAGE_ACCESS_TOKEN },
+        method: "POST",
+        json: request_body,
+    });
 }
 
 
