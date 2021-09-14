@@ -64,70 +64,74 @@ function handleMessage(sender_psid, received_message) {
             break;
         default:
             response = {
-                "text": `"${message}" request not supported yet. Type "help" to receive help.`
+                "text": `"${message}" request not supported yet. Press "help" to know more about the command.`,
+                "quick_replies": [{
+                    "content_type": "text",
+                    "title": "help",
+                    "payload": "<POSTBACK_PAYLOAD>"
+                }]
             }
             break;
+
+            callSendAPI(sender_psid, response);
+
+    };
+
+    function processRequest(arraySelect, message) {
+
+        /* Form response
+        {
+            "text": "",
+            "quick_replies": [{
+                "content_type": "text",
+                "title": "option 1",
+                "payload": "<POSTBACK_PAYLOAD>"
+            },
+            {
+                "content_type": "text",
+                "title": "option 2",
+                "payload": "<POSTBACK_PAYLOAD>"
+            }]
+        };
+        */
+
+        //the button for custom select by add to response.quick_replies.push(replies)
+        let replies = {
+            "content_type": "text",
+            "payload": "<POSTBACK_PAYLOAD>"
+        };
+
+        let response = {
+            "quick_replies": []
+        };
+
+        //create button for user choose next message
+        arraySelect.forEach(element => {
+            replies.title = element;
+            response.quick_replies.push(replies);
+        })
+
+        //message response
+        response.text = message;
+
+        return response;
     }
 
-    callSendAPI(sender_psid, response);
+    // Sends response messages via the Send API (fom Facebook developer)
+    function callSendAPI(sender_psid, response) {
+        let request_body = {
+            recipient: {
+                id: sender_psid,
+            },
+            message: response,
+        };
+        // Send the HTTP request to the Messenger Platform
+        request({
+            uri: "https://graph.facebook.com/v2.6/me/messages",
+            qs: { access_token: PAGE_ACCESS_TOKEN },
+            method: "POST",
+            json: request_body,
+        });
+    }
 
-};
-
-function processRequest(arraySelect, message) {
-
-    /* Form response
-    {
-        "text": "",
-        "quick_replies": [{
-            "content_type": "text",
-            "title": "option 1",
-            "payload": "<POSTBACK_PAYLOAD>"
-        },
-        {
-            "content_type": "text",
-            "title": "option 2",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }]
-    };
-    */
-
-    //the button for custom select by add to response.quick_replies.push(replies)
-    let replies = {
-        "content_type": "text",
-        "payload": "<POSTBACK_PAYLOAD>"
-    };
-
-    let response = {
-        "quick_replies": []
-    };
-
-    //create button for user choose next message
-    arraySelect.forEach(element => {
-        replies.title = element;
-        response.quick_replies.push(replies);
-    })
-
-    //message response
-    response.text = message;
-
-    return response;
-}
-
-// Sends response messages via the Send API (fom Facebook developer)
-function callSendAPI(sender_psid, response) {
-    let request_body = {
-        recipient: {
-            id: sender_psid,
-        },
-        message: response,
-    };
-    // Send the HTTP request to the Messenger Platform
-    request({
-        uri: "https://graph.facebook.com/v2.6/me/messages",
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: "POST",
-        json: request_body,
-    });
-}
-
-module.exports = initWebRouters;
+    module.exports = initWebRouters;
