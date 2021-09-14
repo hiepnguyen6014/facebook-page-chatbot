@@ -5,10 +5,10 @@ require("dotenv").config();
 let app = express();
 
 //config view engine
-let configViewEngine = (app) => {
+/* let configViewEngine = (app) => {
     app.set("view engine", "ejs");
 };
-
+ */
 //call function config
 configViewEngine(app);
 
