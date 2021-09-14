@@ -40,7 +40,7 @@ let postWebhook = async(req, res) => {
 
             // Get the sender PSID
             let sender_psid = webhook_event.sender.id;
-            // console.log("Sender PSID: " + sender_psid);
+            console.log("Sender PSID: " + sender_psid);
 
 
             // Check if the event is a message or postback and
@@ -66,7 +66,7 @@ let postWebhook = async(req, res) => {
 // Handles messages events
 function handleMessage(sender_psid, received_message) {
 
-    const message = received_message.text;
+    // const message = received_message.text;
 
     let helps = [
         "⇨ mon, tue, wed, thu, fri, sat, sun, today, tomorrow: see the class schedule.",
@@ -82,41 +82,12 @@ function handleMessage(sender_psid, received_message) {
             "content_type": "text",
             "title": "tomorrow",
             "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "mon",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "tue",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "wed",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "thu",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "fri",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "sat",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "sun",
-            "payload": "<POSTBACK_PAYLOAD>"
-        }, {
-            "content_type": "text",
-            "title": "help",
-            "payload": "<POSTBACK_PAYLOAD>"
         }]
     };
+
+    let rep = helps.join("\n");
     response.text = helps.join("\n");
+    console.log(rep)
 
     // Send the response message
     callSendAPI(sender_psid, response);
@@ -125,6 +96,7 @@ function handleMessage(sender_psid, received_message) {
 
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
+    console.log("Send");
     let request_body = {
         recipient: {
             id: sender_psid,
